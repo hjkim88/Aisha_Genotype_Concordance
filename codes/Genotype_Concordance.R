@@ -209,7 +209,7 @@ compute_concordance <- function(list1_path="C:/Users/hkim8/SJ/Aisha_SNP/Fluidigm
   heatmap.2(concordance_snp_sample,
             main = "Genotype Concordance",
             xlab = "", ylab = "",
-            col=c("orange", "darkgreen"),
+            col=c("orange", "gray", "green2", "darkgreen"),
             scale="none", key=FALSE,
             dendrogram = 'none', trace = 'none',
             labRow = rownames(concordance_snp_sample),
@@ -222,7 +222,7 @@ compute_concordance <- function(list1_path="C:/Users/hkim8/SJ/Aisha_SNP/Fluidigm
             margins = c(3, 6))
   legend("left", title = "Concordance",
          legend = c("NA", "0", "1", "2"),
-         fill = c("gray", "green2", "orange", "darkgreen"), cex = 1, box.lty = 0)
+         fill = c("gray", "orange", "green2", "darkgreen"), cex = 1, box.lty = 0)
   dev.off()
   
   ### create an empty data frame for the concordance (per snp and per sample)
