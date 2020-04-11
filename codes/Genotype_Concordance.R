@@ -19,6 +19,8 @@
 #               > compute_concordance(list1_path="C:/Users/hkim8/SJ/Aisha_SNP/Fluidigm Genotypes.xlsx",
 #                                     list2_path="C:/Users/hkim8/SJ/Aisha_SNP/GSA Results with Metadata.csv",
 #                                     overlap_path="C:/Users/hkim8/SJ/Aisha_SNP/Overlap SNPs.xlsx",
+#                                     chunk_size=10000,
+#                                     gc_score_threshold=0.15,
 #                                     outputDir="./results/")
 #
 #   * chunk_size = the number of lines that each chunk will contain
@@ -141,6 +143,9 @@ compute_concordance <- function(list1_path="C:/Users/hkim8/SJ/Aisha_SNP/Fluidigm
             signif(as.numeric(difftime(end_time, start_time, units = "mins")), digits = 3),
             "mins"))
   
+  ### remove duplicates (the list2 originally has the duplicates)
+  filtered_data <- filtered_data[which(!duplicated(filtered_data)),]
+  
   ### save the filtered data
   write.xlsx2(filtered_data, file = paste0(outputDir, "filtered_Illumina_data.xlsx"), row.names = FALSE)
   
@@ -175,11 +180,19 @@ compute_concordance <- function(list1_path="C:/Users/hkim8/SJ/Aisha_SNP/Fluidigm
       list2_idx <- intersect(which(list2$RsID == snp), which(list2$Sample.Name.x == samp))
       
       ### compute the concordance (0: no intersection, 1: half-same, 2: exactly the same)
-      if((length(list1_idx) == 1) && (length(list2_idx) == 1)) {
+      if((length(list1_idx) > 0) && (length(list2_idx) > 0)) {
         list1_genotypes <- c(substr(list1$Genotype[list1_idx], 1, 1), substr(list1$Genotype[list1_idx], 2, 2))
-        list2_genotypes <- c(list2$Allele1...Forward, list2$Allele2...Forward)
-        concordance_snp_sample[snp, samp] <- length(intersect(list1_genotypes,
-                                                              list2_genotypes))
+        list2_genotypes <- c(list2$Allele1...Forward[list2_idx], list2$Allele2...Forward[list2_idx])
+        cnt <- 0
+        for(i in 1:length(list1_genotypes)) {
+          for(j in 1:length(list2_genotypes)) {
+            if(list1_genotypes[i] == list2_genotypes[j]) {
+              cnt <- cnt + 1
+              break
+            }
+          }
+        }
+        concordance_snp_sample[snp, samp] <- cnt
       }
     }
   }
