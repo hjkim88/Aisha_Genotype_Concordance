@@ -31,6 +31,10 @@ filter_AIMs <- function(Aims_result_path="Z:/ResearchHome/ResearchHomeDirs/thoma
     install.packages("LaF")
     require(LaF, quietly = TRUE)
   }
+  if(!require(xlsx, quietly = TRUE)) {
+    install.packages("xlsx")
+    require(xlsx, quietly = TRUE)
+  }
   
   ### get the numer of rows in list2 file
   ### if you know the exact number already, just type it
@@ -67,9 +71,7 @@ filter_AIMs <- function(Aims_result_path="Z:/ResearchHome/ResearchHomeDirs/thoma
   
   ### process residuals first then iterate the others
   data <- next_block(df.laf, nrows=(Aims_result_nrow-(iteration_num*chunk_size)))
-  idx <- intersect(which(data[,"RsID"] %in% overlap),
-                   intersect(which(data[,"Sample.Name.x"] %in% list1_sample_ids),
-                             which(data[,"Sample.Name.x"] == data[,"Sample.Name.y"])))
+  idx <- which(data[,"RsID"] == "rs12768894")
   filtered_data <- data[idx,columns]
   
   ### start time
@@ -88,9 +90,7 @@ filter_AIMs <- function(Aims_result_path="Z:/ResearchHome/ResearchHomeDirs/thoma
     data <- next_block(df.laf, nrows=chunk_size)
     
     ### get indicies of rows we want to keep
-    idx <- intersect(which(data[,"RsID"] %in% overlap),
-                     intersect(which(data[,"Sample.Name.x"] %in% list1_sample_ids),
-                               which(data[,"Sample.Name.x"] == data[,"Sample.Name.y"])))
+    idx <- which(data[,"RsID"] == "rs12768894")
     
     ### update the filtered data
     filtered_data <- rbind(filtered_data, data[idx,columns])
@@ -114,14 +114,14 @@ filter_AIMs <- function(Aims_result_path="Z:/ResearchHome/ResearchHomeDirs/thoma
             signif(as.numeric(difftime(end_time, start_time, units = "mins")), digits = 3),
             "mins"))
   
-  ### remove duplicates (the list2 originally has the duplicates)
+  ### remove duplicates (the Aims_result originally has the duplicates)
   filtered_data <- filtered_data[which(!duplicated(filtered_data)),]
   
+  ### create outputDir
+  dir.create(outputDir, showWarnings = TRUE, recursive = TRUE)
+  
   ### save the filtered data
-  write.xlsx2(filtered_data, file = paste0(outputDir, "filtered_Illumina_data.xlsx"), row.names = FALSE)
-  
-  
-  
-  
+  saveRDS(filtered_data, file = paste0(outputDir, "rs12768894_filtered_AIMs_Result.RDS"))
+  write.xlsx2(filtered_data, file = paste0(outputDir, "rs12768894_filtered_AIMs_Result.xlsx"), row.names = FALSE)
   
 }
